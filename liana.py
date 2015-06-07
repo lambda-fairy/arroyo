@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from collections import namedtuple
+import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import os
 from queue import Queue, Full
@@ -11,19 +12,27 @@ from threading import Thread
 import config
 
 
-SCRIPT_RE = re.compile(r'^[A-Za-z0-9_-]+$', re.ASCII)
-
 QUEUE = Queue(maxsize=config.max_queue_size)
+
+
+USER_RE = re.compile(r'^[A-Za-z0-9_][A-Za-z0-9_-]*$', re.ASCII)
+REPO_RE = re.compile(r'^[A-Za-z0-9._-]+$', re.ASCII)
+
+
+def is_valid_repo_name(name):
+    owner, _slash, repo = name.partition('/')
+    return USER_RE.match(owner) and REPO_RE.match(repo) and \
+            repo != '.' and repo != '..'
 
 
 class Task(namedtuple('Task', 'name path')):
     @classmethod
     def find(cls, name):
-        if not SCRIPT_RE.match(name):
-            raise ValueError('Invalid script')
+        if not is_valid_repo_name(name):
+            raise ValueError('Invalid repository name')
         path = os.path.join(config.script_root, name)
         if not os.path.exists(path):
-            raise ValueError('Script does not exist')
+            raise ValueError('No handler for {}'.format(name))
         return cls(name, path)
 
     def run(self):
@@ -51,21 +60,28 @@ class Liana(BaseHTTPRequestHandler):
         self.send_simple(200, self.version_string())
 
     def do_POST(self):
-        # Grab the script path
-        name = self.path.strip('/')
-        try:
-            task = Task.find(name)
-        except ValueError as e:
-            self.send_simple(404, str(e))
-            return
-
-        # Extract JSON data
+        # Extract POST request body
         length = int(self.headers['Content-Length'])
         if length > config.max_request_size:
             self.send_simple(413, 'Too much data!')
             return
         else:
             data = self.rfile.read(length)
+
+        # Extract JSON data
+        try:
+            payload = json.loads(data.decode('utf-8'))
+            name = payload['repository']['full_name']
+        except (ValueError, KeyError):
+            self.send_simple(400, 'Invalid request body')
+            return
+
+        # Grab the script path
+        try:
+            task = Task.find(name)
+        except ValueError as e:
+            self.send_simple(404, str(e))
+            return
 
         # Enqueue
         try:
@@ -74,7 +90,7 @@ class Liana(BaseHTTPRequestHandler):
             self.send_simple(503, 'Server is overloaded right now')
         else:
             print('Queued {}'.format(task))
-            self.send_simple(200, 'Task "{}" queued'.format(name))
+            self.send_simple(200, 'Queued {}'.format(name))
 
     def send_simple(self, code, message):
         self.send_response(code)
