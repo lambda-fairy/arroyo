@@ -70,11 +70,13 @@ class Liana(BaseHTTPRequestHandler):
         self.send_simple(200, self.version_string())
 
     def do_POST(self):
+        self.send_simple(*self._do_POST())
+
+    def _do_POST(self):
         # Extract POST request body
         length = int(self.headers['Content-Length'])
         if length > config.max_request_size:
-            self.send_simple(413, 'Too much data!')
-            return
+            return 413, 'Too much data!'
         else:
             data = self.rfile.read(length)
 
@@ -83,37 +85,33 @@ class Liana(BaseHTTPRequestHandler):
             payload = json.loads(data.decode('utf-8'))
             name = payload['repository']['full_name']
         except (ValueError, KeyError):
-            self.send_simple(400, 'Invalid request body')
-            return
+            return 400, 'Invalid request body'
 
         # Check signatures (if necessary)
         if config.check_signatures:
             try:
                 secret = lookup_secret(name)
             except KeyError:
-                self.send_simple(400, 'Repository not found in secrets file')
-                return
+                return 400, 'Repository not found in secrets file'
             expected_hash = 'sha1=' + hmac.new(secret, data, 'sha1').hexdigest()
             received_hash = self.headers.get('X-Hub-Signature')
             if not hmac.compare_digest(expected_hash, received_hash):
-                self.send_simple(400, 'Invalid or missing signature')
-                return
+                return 400, 'Invalid or missing signature'
 
         # Grab the script path
         try:
             task = Task.find(name)
         except ValueError as e:
-            self.send_simple(404, str(e))
-            return
+            return 400, str(e)
 
         # Enqueue
         try:
             QUEUE.put_nowait(task)
         except Full:
-            self.send_simple(503, 'Server is overloaded right now')
+            return 503, 'Server is overloaded right now'
         else:
             print('Queued {}'.format(task))
-            self.send_simple(200, 'Queued {}'.format(name))
+            return 200, 'Queued {}'.format(name)
 
     def send_simple(self, code, message):
         self.send_response(code)
