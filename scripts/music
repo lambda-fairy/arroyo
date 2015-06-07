@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+
+cd /home/chris/public/music
+
+git fetch
+git reset --hard origin/master
+
+make
