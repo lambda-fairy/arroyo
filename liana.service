@@ -1,0 +1,12 @@
+[Unit]
+Description=Liana
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 -u /srv/liana/liana.py
+EnvironmentFile=/etc/environment
+WorkingDirectory=/srv/liana
+User=chris
+
+[Install]
+WantedBy=multi-user.target
