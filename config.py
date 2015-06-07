@@ -8,3 +8,6 @@ script_root = os.path.join(config_root, 'scripts')
 
 max_request_size = 10 ** 6
 max_queue_size = 5
+
+secrets_path = os.path.join(config_root, 'secrets')
+check_signatures = True

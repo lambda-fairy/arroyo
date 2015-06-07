@@ -2,6 +2,7 @@
 
 from collections import namedtuple
 import json
+import hmac
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import os
 from queue import Queue, Full
@@ -23,6 +24,15 @@ def is_valid_repo_name(name):
     owner, _slash, repo = name.partition('/')
     return USER_RE.match(owner) and REPO_RE.match(repo) and \
             repo != '.' and repo != '..'
+
+
+def lookup_secret(name):
+    """Given a repository name, return its corresponding secret."""
+    secrets = dict(
+            line.split()
+            for line in open(config.secrets_path, 'rb')
+            if not line.startswith(b'#'))
+    return secrets[name.encode('utf-8')]
 
 
 class Task(namedtuple('Task', 'name path')):
@@ -75,6 +85,19 @@ class Liana(BaseHTTPRequestHandler):
         except (ValueError, KeyError):
             self.send_simple(400, 'Invalid request body')
             return
+
+        # Check signatures (if necessary)
+        if config.check_signatures:
+            try:
+                secret = lookup_secret(name)
+            except KeyError:
+                self.send_simple(400, 'Repository not found in secrets file')
+                return
+            expected_hash = 'sha1=' + hmac.new(secret, data, 'sha1').hexdigest()
+            received_hash = self.headers.get('X-Hub-Signature')
+            if not hmac.compare_digest(expected_hash, received_hash):
+                self.send_simple(400, 'Invalid or missing signature')
+                return
 
         # Grab the script path
         try:
