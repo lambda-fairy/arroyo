@@ -7,4 +7,5 @@ cd /home/chris/public/website
 git fetch
 git reset --hard origin/source
 
-OUTPUT=/var/www/lambda cabal run -- rebuild
+cabal run -- rebuild
+rsync --recursive --delete _site/ /var/www/lambda
