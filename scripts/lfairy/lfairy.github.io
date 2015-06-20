@@ -2,10 +2,11 @@
 
 set -e
 
-cd /home/chris/public/website
+cd ~/lfairy.github.io
 
 git fetch
+git checkout source
 git reset --hard origin/source
 
 cabal run -- rebuild
-rsync --recursive --delete _site/ /var/www/lambda
+rsync --recursive --delete _site/ /srv/lambda
