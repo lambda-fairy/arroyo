@@ -37,9 +37,11 @@ Liana is a server that accepts [GitHub webhooks].
 4.  Tell GitHub about your hook
 
 
-## systemd
+## systemd and Upstart
 
 A sample systemd unit file is provided in `liana.service`.
+
+A sample Upstart job file is provided in `liana.conf`.
 
 
 ## Etymology
