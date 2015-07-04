@@ -58,7 +58,10 @@ def worker():
     while True:
         task = QUEUE.get()
         print('Working on', task)
-        task.run()
+        try:
+            task.run()
+        except Exception as e:
+            print('ERROR:', e)
         print('Finished', task)
         QUEUE.task_done()
 
