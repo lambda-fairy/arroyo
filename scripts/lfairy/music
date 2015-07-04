@@ -2,7 +2,7 @@
 
 set -e
 
-cd ~/music
+cd ~/public/music
 
 git fetch
 git checkout master
