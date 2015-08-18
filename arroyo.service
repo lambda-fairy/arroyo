@@ -1,11 +1,11 @@
 [Unit]
-Description=Liana
+Description=Arroyo
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 -u /srv/liana/liana.py
+ExecStart=/usr/bin/python3 -u /srv/arroyo/arroyo.py
 EnvironmentFile=/etc/environment
-WorkingDirectory=/srv/liana
+WorkingDirectory=/srv/arroyo
 User=chris
 
 [Install]

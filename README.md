@@ -1,6 +1,6 @@
-# Liana, the webhook handler
+# Arroyo, the webhook handler
 
-Liana is a server that accepts [GitHub webhooks].
+Arroyo is a server that accepts [GitHub webhooks].
 
 [GitHub webhooks]: https://developer.github.com/webhooks/
 
@@ -16,7 +16,7 @@ Liana is a server that accepts [GitHub webhooks].
 
 1.  Start the daemon
 
-        $ ./liana.py
+        $ ./arroyo.py
         Started server on :8144
         Started worker thread
 
@@ -32,24 +32,16 @@ Liana is a server that accepts [GitHub webhooks].
 3.  Generate a secret key
 
         $ ./add-secret myname/myrepo
-        Added myname/myrepo to /srv/liana/secrets
+        Added myname/myrepo to /srv/arroyo/secrets
 
 4.  Tell GitHub about your hook
 
 
 ## systemd and Upstart
 
-A sample systemd unit file is provided in `liana.service`.
+A sample systemd unit file is provided in `arroyo.service`.
 
-A sample Upstart job file is provided in `liana.conf`.
-
-
-## Etymology
-
-[Lianas] are long-stemmed, woody vines that grow by wrapping themselves
-around neighboring trees.
-
-[Lianas]: https://en.wikipedia.org/wiki/Liana
+A sample Upstart job file is provided in `arroyo.conf`.
 
 
 ## License

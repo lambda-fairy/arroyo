@@ -66,8 +66,8 @@ def worker():
         QUEUE.task_done()
 
 
-class Liana(BaseHTTPRequestHandler):
-    server_version = 'Liana/0'
+class Arroyo(BaseHTTPRequestHandler):
+    server_version = 'Arroyo/0'
 
     def do_GET(self):
         self.send_simple(200, self.version_string())
@@ -127,7 +127,7 @@ class Liana(BaseHTTPRequestHandler):
 def main():
     thread = Thread(target=worker, daemon=True)
     thread.start()
-    server = HTTPServer((config.host, config.port), Liana)
+    server = HTTPServer((config.host, config.port), Arroyo)
     print('Started server on {}:{}'.format(config.host, config.port))
     try:
         server.serve_forever()
