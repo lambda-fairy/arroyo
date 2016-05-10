@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+cd ~/plusone
+
+git fetch
+git checkout master
+git reset --hard origin/master
+
+cd thesis
+make
+
+cp thesis.pdf ~/public/thesis.pdf
