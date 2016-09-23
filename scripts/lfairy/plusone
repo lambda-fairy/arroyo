@@ -8,7 +8,25 @@ git fetch
 git checkout master
 git reset --hard origin/master
 
+################################################################################
+
 cd thesis
-make
+
+# Hack! The server has an old version of minted that doesn't support breaklines :(
+sed -i -e 's/breaklines,//' thesis.tex
+
+make clean && make
+
+git checkout thesis.tex
+rm -f thesis.pyg
 
 cp thesis.pdf ~/public/thesis.pdf
+
+cd ..
+
+################################################################################
+
+cd presentation
+make clean && make
+cp presentation.pdf ~/public/presentation.pdf
+cd ..
