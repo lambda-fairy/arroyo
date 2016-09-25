@@ -30,3 +30,10 @@ cd presentation
 make clean && make
 cp presentation.pdf ~/public/presentation.pdf
 cd ..
+
+################################################################################
+
+cd ramsey
+make clean && make
+cp ramsey.pdf ~/public/ramsey.pdf
+cd ..
